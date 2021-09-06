@@ -1,0 +1,13 @@
+body{
+    background: #d4d3d3b0;
+}
+
+.card{
+    background: #3b86de8a;
+    color: #0c444f;
+    font-size: large !important;
+}
+
+.w-90{
+    width: 90% !important;
+}
