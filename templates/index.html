@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="row pt-5">
+    <div class="col-md-4 offset-md-2">
+        <div class="card" style="width: 18rem;">
+            <img style="width:200px; height: 200px;" class="card-img-top ms-4-75 mt-3" src="static/images/vue.jpg" alt="Vue Version">
+            <div class="card-body">
+                <h5 class="card-title">Vuejs Version</h5>
+                <a href="{{ url_for('vue') }}" class="btn btn-primary">Go</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card" style="width: 18rem;">
+            <img style="width:200px; height: 200px;" class="card-img-top ms-4-75 mt-3" src="static/images/jquery.png" alt="Jquery Version">
+            <div class="card-body">
+                <h5 class="card-title">Jquery Version</h5>
+                <a href="{{ url_for('jquery') }}" class="btn btn-primary">Go</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
