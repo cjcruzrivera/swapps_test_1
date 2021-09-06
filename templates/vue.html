@@ -67,7 +67,7 @@
                     <tr v-for="result in results">
                         <td>[[result.title]]</td>
                         <td>[[ getAuthor(result.author_name) ]]</td>
-                        <td>[[result.first_publish_year]]</td>
+                        <td>[[ getPublished(result.first_publish_year)]]</td>
                         <td>[[result.edition_count]]</td>
                     </tr>
                 </tbody>
@@ -136,6 +136,10 @@
             },
             getAuthor: function (arrayName) {
                 response = arrayName == undefined ? "Unknown" : arrayName[0];
+                return response;
+            },
+            getPublished: function (data) { 
+                response = data == undefined ? "Unknown" : data;
                 return response;
             }
         },
