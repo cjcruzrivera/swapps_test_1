@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<a href="{{ url_for('index') }}">
+    <div class="bk-btn mt-2 ms-md-2">
+        <div class="bk-btn-triangle"></div>
+        <div class="bk-btn-bar"></div>
+    </div>
+</a>
+<div id="app">
+    <div class="card mt-4 ms-md-5" style="width: 35rem;">
+        <div class="card-body">
+            <h5 class="card-title">Test 1.</h5>
+            <h6 class="card-subtitle mb-2">API usage test. Vuejs Version.</h6>
+            <p class="card-text">You can search books by name and/or by author.</p>
+
+            <form class="mb-3">
+                <div class="row mb-2">
+                    <div class="col-md-2">
+                        <label for="book" class="form-label">Book: </label>
+                    </div>
+                    <div class="col-md-10">
+                        <input v-model="book" type="text" class="form-control" id="book">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="author" class="form-label">Author: </label>
+                    </div>
+                    <div class="col-md-10">
+                        <input v-model="author" type="text" class="form-control" id="author">
+                    </div>
+                </div>
+            </form>
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="#" v-on:click="search" class="w-100 card-link btn btn-primary">Search</a>
+                </div>
+                <div class="col-md-4">
+                    <a href="#" v-on:click="clear" class="w-100 card-link btn btn-danger">Clear</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div v-if="loading" class="card mt-2 ms-md-5" style="width: 35rem;">
+        <div class="card-body">
+            <img src="static/images/spinner.gif" alt="" style="width: -webkit-fill-available;">
+        </div>
+    </div>
+
+    <div v-if="totalResults != 0" class="card ms-md-5 mt-2 w-90">
+        <div class="card-body">
+            <h4 class="card-title">
+                It founds [[totalResults]] results
+            </h4>
+            <table class="table table-light table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>First Publish Year</th>
+                        <th>Actual Edition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="result in results">
+                        <td>[[result.title]]</td>
+                        <td>[[ getAuthor(result.author_name) ]]</td>
+                        <td>[[result.first_publish_year]]</td>
+                        <td>[[result.edition_count]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+<script>
+
+    new Vue({
+        el: "#app",
+        delimiters: ['[[', ']]'],
+        data: {
+            book: "",
+            author: "",
+            results: [],
+            loading: false
+        },
+        methods: {
+            search: async function () {
+                if (this.book == "" && this.author == "") {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        html: 'There is nothing to search! <br> Enter a book name and/or an author.',
+                    })
+                    return;
+                }
+                this.loading = true;
+
+                const paramBook = (this.book != "") ? "title=" + this.book : "";
+                const join = (this.book != "" && this.author != "") ? "&" : "";
+                const paramAuthor = (this.author != "") ? "author=" + this.author : "";
+
+                const url = "http://openlibrary.org/search.json?" + paramBook + join + paramAuthor;
+                console.log(url);
+                await axios.get(url).then(response => {
+                    this.results = response.data.docs;
+                }).catch(function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        html: 'There is a problem comunicating with the server',
+                    })
+                    console.log(error.response);
+                })
+                this.loading = false;
+
+            },
+            clear: function () {
+                this.book = "";
+                this.author = "";
+                this.results = [];
+                this.loading = false;
+            },
+            getAuthor: function (arrayName) {
+                return arrayName[0]
+            }
+        },
+        computed: {
+            totalResults: function () {
+                return this.results.length
+            }
+        }
+    })
+</script>
+{% endblock %}
+
+
+
+
+</html>
