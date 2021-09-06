@@ -135,7 +135,8 @@
                 this.loading = false;
             },
             getAuthor: function (arrayName) {
-                return arrayName[0]
+                response = arrayName == undefined ? "Unknown" : arrayName[0];
+                return response;
             }
         },
         computed: {
