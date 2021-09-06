@@ -120,7 +120,13 @@
                     console.log(error.response);
                 })
                 this.loading = false;
-
+                if(this.results.length == 0){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sorry',
+                        html: "No results were found for this search.",
+                    })
+                }
             },
             clear: function () {
                 this.book = "";
