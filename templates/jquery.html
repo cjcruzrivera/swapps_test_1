@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.1/css/jquery.dataTables.min.css">
+{% endblock %}
+
+
+{% block content %}
+
+<a href="{{ url_for('index') }}">
+    <div class="bk-btn mt-2 ms-md-2">
+        <div class="bk-btn-triangle"></div>
+        <div class="bk-btn-bar"></div>
+    </div>
+</a>
+
+<div class="card mt-4 ms-md-5" style="width: 35rem;">
+    <div class="card-body">
+        <h5 class="card-title">Test 1.</h5>
+        <h6 class="card-subtitle mb-2">API usage test. Jquery Version.</h6>
+        <p class="card-text">You can search books by name and/or by author.</p>
+
+        <form class="mb-3">
+            <div class="row mb-2">
+                <div class="col-md-2">
+                    <label for="book" class="form-label">Book: </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="book">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="author" class="form-label">Author: </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="author">
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-md-4">
+                <button type="button" onclick="search()" class="w-100 card-link btn btn-primary">Search</button>
+            </div>
+            <div class="col-md-4">
+                <button type="button" onclick="clearForm()" class="w-100 card-link btn btn-danger">Clear</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="loading" class="card mt-2 ms-md-5 d-none" style="width: 35rem;">
+    <div class="card-body">
+        <img src="static/images/spinner.gif" alt="" style="width: -webkit-fill-available;">
+    </div>
+</div>
+
+<div id="results" class="card ms-md-5 mt-2 w-90 d-none" style="background: #add0ee;">
+    <div class="card-body">
+        <h4 class="card-title" id="results">
+        </h4>
+        <table id="tableResults" class="table table-light table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>First Publish Year</th>
+                    <th>Actual Edition</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.1/js/jquery.dataTables.min.js"></script>
+
+<script>
+
+    function search() {
+        var book = $("#book").val();
+        var author = $("#author").val();
+
+        if (book == "" && author == "") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                html: 'There is nothing to search! <br> Enter a book name and/or an author.',
+            })
+            return;
+        }
+
+        const paramBook = (book != "") ? "title=" + book : "";
+        const join = (book != "" && author != "") ? "&" : "";
+        const paramAuthor = (author != "") ? "author=" + author : "";
+
+        const url = "http://openlibrary.org/search.json?" + paramBook + join + paramAuthor;
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            dataType: "json",
+            data: {},
+            beforeSend: function () {
+                $("#loading").removeClass("d-none");
+                $("#results").addClass("d-none");
+            },
+            success: function (response) {
+                console.log(response);
+                var books = response.docs;
+                var html = "";
+                if (books.length == 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sorry',
+                        html: "No results were found for this search.",
+                    })
+                    $("#results").addClass("d-none");
+                } else {
+                    $("#results").removeClass("d-none");
+                    $("#tbody").html("");
+                    if ($.fn.DataTable.isDataTable('#tableResults')) {
+                        $('#tableResults').DataTable().clear();
+                        $('#tableResults').DataTable().destroy();
+                    }
+                    for (var i = 0; i < books.length; i++) {
+                        var book = books[i];
+                        var author = book.author_name == undefined ? "Unknown" : book.author_name[0];
+                        var published = book.first_publish_year == undefined ? "Unknown" : book.first_publish_year;
+                        html += "<tr>";
+                        html += "<td>" + book.title + "</td>";
+                        html += "<td>" + author + "</td>";
+                        html += "<td>" + published + "</td>";
+                        html += "<td>" + book.edition_count + "</td>";
+                        html += "</tr>";
+                    }
+                    $("#tbody").append(html);
+                    $('#tableResults').DataTable();
+                }
+                $("#loading").addClass("d-none");
+            },
+            error: function (error) {
+                $("#loading").addClass("d-none");
+                $("#results").addClass("d-none");
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    html: 'There is a problem comunicating with the server',
+                })
+            }
+        });
+    }
+
+    function clearForm() {
+        $("#book").val("");
+        $("#author").val("");
+        $("#results").addClass("d-none");
+        $("#loading").addClass("d-none");
+    }
+
+</script>
+
+{% endblock %}
